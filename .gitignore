@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/
+*.egg-info/
+
+# OTA firmware images (build artifacts, regenerated)
+FIRMWARE_UPDATES/*.bin
+
+# Local secrets
+.env
+*credentials.local*
+
+# --- Python build / coverage ---
+build/
+dist/
+.coverage
+.mypy_cache/
+.ruff_cache/
+
+# --- OS / editor cruft ---
+.DS_Store
+Thumbs.db
+*~
+*.swp
+.idea/
+.vscode/
+.admin_sessions.json
+DEVICE_LOGS/

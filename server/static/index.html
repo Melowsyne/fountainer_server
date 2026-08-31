@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fountainer Admin</title>
+<style>
+  /* Monochrome design system: black ink on paper-white, grays as tones. */
+  :root {
+    --bg:#f7f7f5; --surface:#ffffff; --ink:#111111; --ink2:#3d3d3d;
+    --mut:#767676; --line:#e2e2e0; --line2:#cfcfcd; --band:#ebebeb;
+  }
+  * { box-sizing:border-box; }
+  html,body { margin:0; }
+  body { font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
+         background:var(--bg); color:var(--ink); font-size:15px; }
+
+  /* ---- Header + menu ---- */
+  header { background:var(--ink); color:#fff; }
+  .hrow { max-width:1280px; margin:0 auto; padding:.75rem 1.25rem;
+          display:flex; align-items:baseline; gap:1rem; }
+  .brand { font-weight:700; letter-spacing:.14em; font-size:1.02rem; }
+  .brand small { font-weight:400; color:#bbb; letter-spacing:.05em; margin-left:.5rem; }
+  .hspacer { flex:1; }
+  .hsum { color:#ccc; font-size:.8rem; }
+  header a { color:#ccc; font-size:.8rem; text-decoration:none; border-bottom:1px solid #555; }
+  header a:hover { color:#fff; border-color:#fff; }
+
+  nav { background:var(--surface); border-bottom:1px solid var(--line2); }
+  .nrow { max-width:1280px; margin:0 auto; padding:0 1.25rem;
+          display:flex; align-items:center; gap:.25rem; }
+  .tab { padding:.7rem .9rem; font-size:.86rem; color:var(--mut); cursor:pointer;
+         border:0; background:none; border-bottom:2px solid transparent; }
+  .tab:hover { color:var(--ink); }
+  .tab.active { color:var(--ink); font-weight:600; border-bottom-color:var(--ink); }
+  .devsel { margin-left:auto; display:flex; align-items:center; gap:.5rem;
+            font-size:.8rem; color:var(--mut); }
+
+  /* ---- Device overview (multi-device operation) ---- */
+  .devcards { display:flex; flex-wrap:wrap; gap:.75rem; margin-bottom:1rem; }
+  .devcard { background:var(--surface); border:1px solid var(--line2);
+             border-radius:10px; padding:.7rem .9rem; cursor:pointer;
+             min-width:210px; }
+  .devcard:hover { border-color:var(--ink2); }
+  .devcard.sel { border-color:var(--ink); box-shadow:0 0 0 1px var(--ink); }
+  .devcard .dl { font-weight:700; font-size:.95rem; display:flex;
+                 align-items:center; gap:.5rem; }
+  .devcard .did { color:var(--mut); font-size:.75rem; margin-top:.15rem; }
+  .devcard .dmeta { color:var(--ink2); font-size:.78rem; margin-top:.35rem; }
+
+  main { max-width:1280px; margin:0 auto; padding:1.25rem; }
+  .page { display:none; } .page.active { display:block; }
+
+  .card { background:var(--surface); border:1px solid var(--line2);
+          border-radius:10px; padding:1rem 1.1rem; margin-bottom:1rem; }
+  .card h2 { font-size:.8rem; margin:0 0 .8rem; text-transform:uppercase;
+             letter-spacing:.08em; color:var(--ink2); font-weight:600; }
+  .meta { color:var(--mut); font-size:.8rem; }
+
+  /* ---- Status tiles ---- */
+  .tiles { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+           gap:.75rem; margin-bottom:1rem; }
+  .tile { background:var(--surface); border:1px solid var(--line2); border-radius:10px;
+          padding:.7rem .9rem; }
+  .tile .k { font-size:.68rem; text-transform:uppercase; letter-spacing:.08em;
+             color:var(--mut); margin-bottom:.25rem; }
+  .tile .v { font-size:1.45rem; font-weight:700; line-height:1.15; font-variant-numeric:tabular-nums; }
+  .tile .v small { font-size:.72rem; font-weight:400; color:var(--mut); }
+  .tile.inv { background:var(--ink); border-color:var(--ink); }
+  .tile.inv .k { color:#aaa; } .tile.inv .v { color:#fff; }
+
+  .dot { width:9px; height:9px; border-radius:50%; display:inline-block;
+         margin-right:.45rem; vertical-align:1px; }
+  .dot.on { background:var(--ink); }
+  .dot.off { background:transparent; border:2px solid var(--mut); width:7px; height:7px; }
+
+  /* ---- Chart ---- */
+  .chartbar { display:flex; align-items:center; gap:.4rem; margin-bottom:.6rem; flex-wrap:wrap; }
+  .chartbar .legend { display:flex; gap:1rem; font-size:.78rem; color:var(--ink2); }
+  .lg { display:flex; align-items:center; gap:.4rem; }
+  .lg .sw-line { width:18px; height:0; border-top:2px solid var(--ink); }
+  .lg .sw-band { width:14px; height:11px; background:var(--band); border:1px solid var(--line2); }
+  .chartbar .spacer { flex:1; }
+  .rng { border:1px solid var(--line2); background:var(--surface); color:var(--mut);
+         font-size:.75rem; padding:.28rem .6rem; border-radius:7px; cursor:pointer; }
+  .rng.active { background:var(--ink); border-color:var(--ink); color:#fff; }
+  #chartwrap { position:relative; }
+  #chart { width:100%; height:280px; display:block; }
+  #tip { position:absolute; display:none; pointer-events:none; background:var(--surface);
+         border:1px solid var(--ink); border-radius:7px; padding:.4rem .6rem;
+         font-size:.75rem; line-height:1.5; box-shadow:0 2px 8px rgba(0,0,0,.12);
+         white-space:nowrap; z-index:5; }
+  #tip b { font-variant-numeric:tabular-nums; }
+
+  /* ---- Buttons & forms ---- */
+  button { padding:.45rem .75rem; border-radius:8px; font-size:.82rem; cursor:pointer;
+           background:var(--surface); color:var(--ink); border:1px solid var(--ink2); }
+  button:hover { background:var(--ink); color:#fff; border-color:var(--ink); }
+  /* "Like a real button": visible, tangible press point + status flash. */
+  button:active:not(:disabled) { transform:translateY(1px) scale(.98);
+    box-shadow:inset 0 2px 4px rgba(0,0,0,.25); }
+  button.busy { opacity:.6; cursor:progress; }
+  button.flash-ok  { background:#1a7f37 !important; border-color:#1a7f37 !important;
+    color:#fff !important; transition:background .15s; }
+  button.flash-bad { background:#b42318 !important; border-color:#b42318 !important;
+    color:#fff !important; transition:background .15s; }
+  button:disabled { opacity:.35; cursor:not-allowed; }
+  button.pri { background:var(--ink); color:#fff; border-color:var(--ink); }
+  button.pri:hover { background:#000; }
+  button.danger { background:var(--surface); border:2px solid var(--ink); font-weight:600; }
+  button.seg { border:1px solid var(--line2); color:var(--mut); }
+  button.seg.active { background:var(--ink); border-color:var(--ink); color:#fff; }
+  input, select { padding:.42rem .5rem; border-radius:7px; border:1px solid var(--line2);
+                  background:var(--surface); color:var(--ink); font-size:.82rem; }
+  input.num { width:5.5rem; }
+  .row { display:flex; flex-wrap:wrap; gap:.45rem; margin:.5rem 0; align-items:center; }
+  fieldset { border:1px solid var(--line); border-radius:9px; margin:.7rem 0 0; padding:.6rem .8rem; }
+  legend { color:var(--mut); font-size:.7rem; padding:0 .35rem;
+           text-transform:uppercase; letter-spacing:.07em; }
+  .res { font-size:.8rem; margin-top:.6rem; min-height:1.1em; font-family:ui-monospace,monospace; }
+  .res.ok::before { content:"✓ "; } .res.bad::before { content:"✕ "; }
+  .res.bad { font-weight:600; }
+
+  /* ---- Tables (datapoints, firmware) ---- */
+  table { width:100%; border-collapse:collapse; font-size:.8rem; }
+  th { text-align:left; color:var(--mut); font-weight:500; text-transform:uppercase;
+       font-size:.66rem; letter-spacing:.06em; padding:.3rem .55rem;
+       border-bottom:1px solid var(--line2); }
+  td { padding:.26rem .55rem; border-bottom:1px solid var(--line); }
+  td.name { font-family:ui-monospace,monospace; white-space:nowrap; color:var(--ink2); }
+  td.val { font-weight:600; font-variant-numeric:tabular-nums; }
+  td.val small { color:var(--mut); font-weight:400; }
+  td.age { color:var(--mut); white-space:nowrap; text-align:right; }
+  td.na { color:var(--mut); font-weight:400; font-style:italic; }
+  tr.grp td { color:var(--ink); font-size:.66rem; text-transform:uppercase;
+              letter-spacing:.09em; padding-top:.7rem; font-weight:700; border-bottom:0; }
+
+  /* ---- Event/log feeds ---- */
+  .feed { border:1px solid var(--line); border-radius:8px; max-height:340px;
+          overflow:auto; font-size:.78rem; }
+  .ev { display:flex; gap:.6rem; padding:.28rem .6rem; border-bottom:1px solid var(--line); }
+  .ev:last-child { border-bottom:0; }
+  .ev .t { color:var(--mut); flex:0 0 4.4rem; font-variant-numeric:tabular-nums; }
+  .ev.warn .m::before { content:"⚠ "; }
+  .ev.err .m { background:var(--ink); color:#fff; padding:0 .35rem; border-radius:4px; }
+  .cols2 { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+  @media (max-width:900px){ .cols2 { grid-template-columns:1fr; } }
+  #fwbox { font-family:ui-monospace,monospace; font-size:.78rem; }
+</style>
+</head>
+<body>
+<header><div class="hrow">
+  <span class="brand">FOUNTAINER<small>admin</small></span>
+  <span class="hspacer"></span>
+  <span class="hsum" id="summary"></span>
+  <a href="/logout">Log out</a>
+</div></header>
+<nav><div class="nrow">
+  <button class="tab" data-page="dashboard">Dashboard</button>
+  <button class="tab" data-page="control">Control</button>
+  <button class="tab" data-page="datapoints">Datapoints</button>
+  <button class="tab" data-page="logs">Logs</button>
+  <button class="tab" data-page="firmware">Firmware</button>
+  <span class="devsel"><label for="devpick">Device</label>
+    <select id="devpick"></select></span>
+</div></nav>
+
+<main>
+  <!-- ============ DASHBOARD ============ -->
+  <section class="page" id="page-dashboard">
+    <div class="devcards" id="devcards"></div>
+    <div class="tiles" id="tiles"></div>
+    <div class="card">
+      <h2>Pressure &amp; relay — live</h2>
+      <div class="chartbar">
+        <div class="legend">
+          <span class="lg"><span class="sw-line"></span> Pressure (bar)</span>
+          <span class="lg"><span class="sw-band"></span> Relay ON</span>
+        </div>
+        <span class="spacer"></span>
+        <button class="rng" data-min="10">10 min</button>
+        <button class="rng active" data-min="30">30 min</button>
+        <button class="rng" data-min="120">2 h</button>
+      </div>
+      <div id="chartwrap">
+        <canvas id="chart"></canvas>
+        <div id="tip"></div>
+      </div>
+      <div class="meta" id="chartmeta" style="margin-top:.4rem"></div>
+    </div>
+    <div class="card">
+      <h2>Recent events</h2>
+      <div id="dashevents"></div>
+    </div>
+  </section>
+
+  <!-- ============ CONTROL ============ -->
+  <section class="page" id="page-control">
+    <div class="card">
+      <h2>Pump control</h2>
+      <div class="row" id="cmdrow"></div>
+      <fieldset><legend>Turn on for duration</legend>
+        <div class="row">
+          <button class="dpre" data-steps="4">2 min</button>
+          <button class="dpre" data-steps="10">5 min</button>
+          <button class="dpre" data-steps="20">10 min</button>
+          <span class="meta">|</span>
+          <input class="num" id="dur" type="number" min="0.5" step="0.5" value="2">
+          <span class="meta">min</span>
+          <button id="durbtn">Turn on</button>
+        </div>
+        <div class="meta" id="durstate"></div></fieldset>
+      <fieldset><legend>Datapoint write / read</legend>
+        <div class="row">
+          <select id="wsel"></select>
+          <input class="num" id="wval" placeholder="Value">
+          <button id="wbtn">dp_write</button>
+          <button id="readbtn">Refresh (dp_read)</button>
+        </div>
+        <div class="meta">Network_Save: 1 = persist · 2 = persist + reboot ·
+          3 = restore backup · 4 = TRIAL reboot (auto-rollback unless the
+          session returns within 120 s)</div>
+      </fieldset>
+      <div class="res" id="ctrlres"></div>
+    </div>
+  </section>
+
+  <!-- ============ DATAPOINTS ============ -->
+  <section class="page" id="page-datapoints">
+    <div class="card">
+      <h2>Datapoints</h2>
+      <div class="row">
+        <button class="seg" id="segstatus">Status</button>
+        <button class="seg" id="segall">All datapoints</button>
+      </div>
+      <div id="dpview"></div>
+    </div>
+  </section>
+
+  <!-- ============ LOGS ============ -->
+  <section class="page" id="page-logs">
+    <div class="cols2">
+      <div class="card"><h2>Device log (log_read)</h2><div id="devlog"></div></div>
+      <div class="card"><h2>Server events</h2><div id="srvevents"></div></div>
+    </div>
+  </section>
+
+  <!-- ============ FIRMWARE ============ -->
+  <section class="page" id="page-firmware">
+    <div class="card">
+      <h2>Firmware images (FIRMWARE_UPDATES)</h2>
+      <div id="fwbox"></div>
+      <div class="row" style="margin-top:.8rem">
+        <button class="danger" id="otabtn">ota_cancel</button>
+        <button class="danger" id="rebootbtn">Reboot device (triggers ota_check)</button>
+      </div>
+      <div class="res" id="fwres"></div>
+    </div>
+  </section>
+</main>
+
+<script>
+/* ================= value formatting (from generated meta) ================= */
+const STATE = {0:"Init",1:"Off",2:"On",3:"Auto",4:"Manual",5:"Fault"};
+const RESET = {0:"unknown",1:"power-on",2:"ext pin",3:"software",4:"panic",
+               5:"int-WDT",6:"task-WDT",7:"WDT",8:"deep sleep",9:"brownout",
+               10:"SDIO",11:"USB",12:"JTAG"};
+const DEMAND = {0:"none",1:"unknown",2:"hand",3:"tank",4:"LEAK?",5:"PIPE BREAK",6:"sensor"};
+const FAULT  = {0:"none",1:"sensor",2:"critical low",3:"max runtime",4:"dry run",5:"starts/hour"};
+const MAPS = {
+  state: STATE, demand: DEMAND, fault: FAULT, reset: RESET,
+  onoff: {0:"off",1:"ON"},
+  linkstate: {0:"GOOD",1:"POOR"},
+  trial: {0:"idle",1:"TESTING…",2:"confirmed",3:"ROLLED BACK"},
+  power: {0:"HIGH (160 MHz)",1:"LOW (80 MHz, PS)"},
+  dhcp:  {0:"false (static)",1:"true (DHCP)"},
+};
+let DP_META = {}, WRITABLE = [];
+async function loadMeta(){
+  const raw = await (await fetch("/static/datapoints_meta.json")).json();
+  for (const [name, v] of Object.entries(raw)){
+    const m = {};
+    if (v.unit) m.unit = v.unit;
+    if (v.dec != null) m.dec = v.dec;
+    if (v.map) m.map = MAPS[v.map] || {};
+    if (v.fmt) m.fmt = v.fmt;
+    DP_META[name] = m;
+    if (v.access === "RW") WRITABLE.push(name);
+  }
+  document.getElementById("wsel").innerHTML =
+    WRITABLE.map(n=>`<option>${n}</option>`).join("");
+}
+function fmtVal(key, val){
+  const m = DP_META[key] || {};
+  let disp;
+  if (val===undefined || val===null || val==="") disp = "—";
+  else if (m.map){ const i = typeof val==="boolean" ? (val?1:0) : val;
+      disp = m.map[i]!==undefined ? `${val} <small>(${m.map[i]})</small>` : val; }
+  else if (m.fmt==="datetime"){
+      const n = typeof val==="number" ? val : parseInt(String(val), 16);
+      disp = (n>0) ? `${new Date(n).toLocaleString()} <small>(${val})</small>` : val; }
+  else if (m.dec!=null && typeof val==="number") disp = val.toFixed(m.dec);
+  else disp = val;
+  return `${disp}${m.unit ? ` <small>${m.unit}</small>` : ""}`;
+}
+function fmtAge(s){
+  if (s==null) return "—";
+  if (s < 5)    return "just now";
+  if (s < 90)   return `${Math.round(s)} s ago`;
+  if (s < 5400) return `${Math.round(s/60)} min ago`;
+  return `${(s/3600).toFixed(1)} h ago`;
+}
+
+/* ================= API helpers ================= */
+async function api(path, body){
+  const r = await fetch(path, {method:"POST", headers:{"Content-Type":"application/json"},
+                               body: JSON.stringify(body)});
+  return { status:r.status, data: await r.json().catch(()=>({})) };
+}
+function showRes(el, r){
+  const ok = r.status===200 && r.data.ok;
+  el.className = "res " + (ok ? "ok":"bad");
+  el.textContent = ok ? JSON.stringify(r.data.result) : (r.data.error || ("HTTP "+r.status));
+}
+
+/* ================= app state ================= */
+let DEVICES = [], FIRMWARE = [], CUR = null;   // CUR = selected device_id
+const dev = () => DEVICES.find(d=>d.device_id===CUR) || null;
+
+/* Uniform display: ALL devices show their full 16-digit hex serial
+ * number (no more FNT-xxxxxx short form). Fallback: device_id. */
+const devLabel = d => (d.serial || "").toUpperCase() || d.device_id;
+
+/* ================= tabs (menu) ================= */
+const PAGES = ["dashboard","control","datapoints","logs","firmware"];
+function showPage(name){
+  if (!PAGES.includes(name)) name = "dashboard";
+  document.querySelectorAll(".tab").forEach(t =>
+    t.classList.toggle("active", t.dataset.page===name));
+  PAGES.forEach(p => document.getElementById("page-"+p)
+    .classList.toggle("active", p===name));
+  if (name==="dashboard") chartDraw();
+}
+document.querySelectorAll(".tab").forEach(t =>
+  t.onclick = () => { location.hash = t.dataset.page; });
+window.addEventListener("hashchange",
+  () => showPage(location.hash.replace("#","")));
+
+/* ================= dashboard: status tiles ================= */
+function tile(k, v, inv){
+  return `<div class="tile${inv?" inv":""}"><div class="k">${k}</div><div class="v">${v}</div></div>`;
+}
+function renderTiles(){
+  const d = dev(); const el = document.getElementById("tiles");
+  if (!d){ el.innerHTML = ""; return; }
+  const dp = d.dp || {};
+  const st = STATE[dp.Fon_Current_State] ?? "—";
+  const fault = dp.Fon_Fault_Code > 0;
+  const press = typeof dp.Fon_Current_Pressure==="number"
+      ? dp.Fon_Current_Pressure.toFixed(2)+" <small>bar</small>" : "—";
+  const relay = dp.Fon_Relay_Output ? "ON" : "off";
+  const link = (MAPS.linkstate[dp.Net_Link_State] ?? "—")
+      + (typeof dp.System_RSSI==="number" ? ` <small>${dp.System_RSSI} dBm</small>`:"");
+  const power = dp.System_Power_Mode===1 ? "LOW" : (dp.System_Power_Mode===0 ? "HIGH" : "—");
+  const up = dp.System_Uptime!=null ? Math.floor(dp.System_Uptime/3600)+"h "
+      + Math.floor(dp.System_Uptime%3600/60)+"m" : "—";
+  el.innerHTML =
+    tile("Connection", `<span class="dot ${d.online?"on":"off"}"></span>${d.online?"online":"offline"}`)
+    + tile("Pump state", fault ? `FAULT <small>(${FAULT[dp.Fon_Fault_Code]||dp.Fon_Fault_Code})</small>` : st, fault)
+    + tile("Pressure", press)
+    + tile("Relay (SSR)", relay, dp.Fon_Relay_Output===true)
+    + tile("Link", link)
+    + tile("Power", power)
+    + tile("Uptime", `${up} <small>fw ${d.fw_version||"?"}</small>`);
+}
+
+/* ================= dashboard: live chart ================= */
+/* Monochrome, single y-axis (bar). The relay is a full-height background
+   band (no second scale); its identity is carried by the legend and the
+   crosshair tooltip, never by the fill alone. */
+const HIST = [];            // {i, t, p, r[, seq]} samples, server-fed, capped client-side
+let histLastI = 0;          // highest insertion ID we already have —
+                            // backfill (OLDER samples fetched later from the
+                            // device history) gets a NEW i and thus still
+                            // arrives despite its older t.
+let rangeMin = 30;          // visible window in minutes
+const HIST_SEQS = new Set();  // dedup of backfilled device samples
+async function pollHistory(){
+  if (!CUR) return;
+  try{
+    const r = await fetch(`/api/history?device_id=${encodeURIComponent(CUR)}&since_i=${histLastI}`);
+    if (!r.ok) return;
+    const j = await r.json();
+    for (const s of j.samples){
+      if (s.i > histLastI) histLastI = s.i;
+      if (s.seq !== undefined){
+        if (HIST_SEQS.has(s.seq)) continue;
+        HIST_SEQS.add(s.seq);
+      }
+      // insert sorted by t (backfill lands in the past) —
+      // chartDraw and the 90 s gap rule require ascending t.
+      let pos = HIST.length;
+      while (pos > 0 && HIST[pos-1].t > s.t) pos--;
+      HIST.splice(pos, 0, s);
+    }
+    if (HIST.length > 6000) HIST.splice(0, HIST.length-6000);
+    chartDraw();
+  }catch(e){/* transient */}
+}
+document.querySelectorAll(".rng").forEach(b => b.onclick = () => {
+  document.querySelectorAll(".rng").forEach(x=>x.classList.toggle("active", x===b));
+  rangeMin = Number(b.dataset.min); chartDraw();
+});
+
+const cv = document.getElementById("chart"), tip = document.getElementById("tip");
+let hoverX = null;
+const PAD = {l:46, r:12, t:10, b:22};
+function chartDraw(){
+  const wrap = cv.parentElement, dpr = window.devicePixelRatio||1;
+  const W = wrap.clientWidth, H = 280;
+  if (!W) return;
+  cv.width = W*dpr; cv.height = H*dpr; cv.style.height = H+"px";
+  const ctx = cv.getContext("2d"); ctx.scale(dpr,dpr);
+  ctx.clearRect(0,0,W,H);
+  const now = Date.now(), t0 = now - rangeMin*60000;
+  const pts = HIST.filter(s => s.t >= t0 && typeof s.p==="number");
+  const iw = W-PAD.l-PAD.r, ih = H-PAD.t-PAD.b;
+  const X = t => PAD.l + (t-t0)/(now-t0)*iw;
+
+  /* y-scale: 0-based, headroom, nice ticks */
+  let pmax = 0; for (const s of pts) if (s.p>pmax) pmax = s.p;
+  pmax = Math.max(pmax*1.15, 0.5);
+  const step = pmax>4 ? 1 : (pmax>2 ? 0.5 : (pmax>0.8 ? 0.25 : 0.1));
+  pmax = Math.ceil(pmax/step)*step;
+  const Y = p => PAD.t + ih - (p/pmax)*ih;
+
+  /* relay ON bands (full height, behind everything) */
+  ctx.fillStyle = "#ebebeb";
+  let bandStart = null;
+  const all = HIST.filter(s => s.t >= t0);
+  for (let i=0;i<all.length;i++){
+    const on = all[i].r===1;
+    if (on && bandStart===null) bandStart = all[i].t;
+    if ((!on || i===all.length-1) && bandStart!==null){
+      const tEnd = on ? now : all[i].t;
+      ctx.fillRect(X(bandStart), PAD.t, Math.max(X(tEnd)-X(bandStart),1.5), ih);
+      bandStart = null;
+    }
+  }
+
+  /* grid + y labels */
+  ctx.strokeStyle = "#eeeeee"; ctx.fillStyle = "#767676";
+  ctx.font = "11px system-ui"; ctx.textAlign = "right"; ctx.lineWidth = 1;
+  for (let p=0; p<=pmax+1e-9; p+=step){
+    const y = Y(p);
+    ctx.beginPath(); ctx.moveTo(PAD.l, y); ctx.lineTo(W-PAD.r, y); ctx.stroke();
+    ctx.fillText(p.toFixed(step<1?2:0), PAD.l-7, y+3.5);
+  }
+  /* x labels */
+  ctx.textAlign = "center";
+  const nTicks = Math.min(6, Math.floor(iw/90));
+  for (let i=0;i<=nTicks;i++){
+    const t = t0 + (now-t0)*i/nTicks;
+    ctx.fillText(new Date(t).toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"}),
+                 X(t), H-6);
+  }
+  /* axis line */
+  ctx.strokeStyle = "#cfcfcd";
+  ctx.beginPath(); ctx.moveTo(PAD.l, PAD.t); ctx.lineTo(PAD.l, PAD.t+ih);
+  ctx.lineTo(W-PAD.r, PAD.t+ih); ctx.stroke();
+
+  /* pressure line */
+  if (pts.length){
+    ctx.strokeStyle = "#111111"; ctx.lineWidth = 2;
+    ctx.lineJoin = "round"; ctx.beginPath();
+    /* gap detection: don't bridge silences > 90 s (slow-mode grid) */
+    let prev = null;
+    for (const s of pts){
+      if (prev && s.t - prev > 90000) ctx.moveTo(X(s.t), Y(s.p));
+      else if (prev===null) ctx.moveTo(X(s.t), Y(s.p));
+      else ctx.lineTo(X(s.t), Y(s.p));
+      prev = s.t;
+    }
+    ctx.stroke();
+  }
+
+  /* crosshair + hover marker */
+  if (hoverX!==null && pts.length){
+    const tH = t0 + (hoverX-PAD.l)/iw*(now-t0);
+    let best = pts[0];
+    for (const s of pts) if (Math.abs(s.t-tH) < Math.abs(best.t-tH)) best = s;
+    const bx = X(best.t), by = Y(best.p);
+    ctx.strokeStyle = "#999999"; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(bx, PAD.t); ctx.lineTo(bx, PAD.t+ih); ctx.stroke();
+    ctx.fillStyle = "#ffffff"; ctx.strokeStyle = "#111111"; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(bx, by, 4.5, 0, 7); ctx.fill(); ctx.stroke();
+    tip.style.display = "block";
+    const left = bx > W-170 ? bx-160 : bx+12;
+    tip.style.left = left+"px"; tip.style.top = Math.max(by-46, 4)+"px";
+    tip.innerHTML = `${new Date(best.t).toLocaleTimeString()}<br>`
+      + `Pressure <b>${best.p.toFixed(2)} bar</b><br>`
+      + `Relay <b>${best.r ? "ON" : "off"}</b>`;
+  } else tip.style.display = "none";
+
+  document.getElementById("chartmeta").textContent = pts.length
+    ? `${pts.length} samples in window · newest ${fmtAge((now-HIST[HIST.length-1].t)/1000)}`
+    : "waiting for samples… (the device reports pressure deltas while it changes, full snapshots on its report grid)";
+}
+cv.addEventListener("mousemove", e => {
+  const r = cv.getBoundingClientRect(); hoverX = e.clientX-r.left; chartDraw(); });
+cv.addEventListener("mouseleave", () => { hoverX = null; chartDraw(); });
+window.addEventListener("resize", chartDraw);
+
+/* ================= feeds ================= */
+function feed(items, fmt){
+  if (!items || !items.length) return "<div class='meta'>— none —</div>";
+  return "<div class='feed'>" + items.slice().reverse().map(fmt).join("") + "</div>";
+}
+const evFmt = e =>
+  `<div class="ev ${e.level||'info'}"><span class="t">${e.t}</span><span class="m">${e.text}</span></div>`;
+const LOG_LVL = {1:"ERROR",2:"WARN",3:"INFO",4:"DEBUG",5:"TRACE"};
+const LOG_MOD = {1:"system",2:"wlan",3:"pump",4:"ota",5:"event",6:"task",7:"app",8:"idf"};
+const LOG_EVT = {1:"", 100:"boot",101:"ready",102:"low memory",103:"fatal",
+  120:"climate sensor",121:"nvs save failed",
+  700:"wd timeout",701:"wd recovered",702:"wd reboot",703:"wd brake",704:"wd boot diagnosis",
+  200:"wlan connected",201:"wlan disconnected",202:"session ready",203:"session lost",
+  210:"LINK POOR",211:"link recovered",212:"net sample",
+  300:"ota started",301:"ota applied",302:"ota failed",303:"ota unsigned rejected",
+  400:"pump state",401:"pump fault",402:"pump fault cleared",
+  410:"pm sample",411:"pm event summary",412:"event label",413:"relay fail",
+  500:"config saved",501:"config restored",502:"power mode",503:"dp write",
+  600:"task started",601:"task stopped",602:"cycle overrun",603:"stack low", 800:""};
+const fmtUp = ms => { const s=Math.floor(ms/1000);
+  return (s>=3600?Math.floor(s/3600)+"h":"")+Math.floor(s%3600/60)+"m"+(s%60)+"s"; };
+const logFmt = r => {
+  const lvl = LOG_LVL[r.lvl]||r.lvl, cls = r.lvl===1?"err":(r.lvl===2?"warn":"info");
+  const name = LOG_EVT[r.ev] ?? ("ev"+r.ev);
+  const parts = [name, r.t||"", (r.a&&r.a.length)?("["+r.a.join(", ")+"]"):""]
+    .filter(Boolean).join(" · ");
+  return `<div class="ev ${cls}"><span class="t">${fmtUp(r.u)}</span>`+
+         `<span class="m">${lvl} ${LOG_MOD[r.mod]||r.mod}: ${parts}</span></div>`;
+};
+
+/* ================= datapoint table ================= */
+const DP_GROUPS = ["Device_","System_","Ambient_","Fon_","Network_","Backup_"];
+const grpOf = k => { const i = DP_GROUPS.findIndex(p=>k.startsWith(p)); return i<0 ? DP_GROUPS.length : i; };
+function dpKeysStable(dp){
+  const metaKeys = Object.keys(DP_META);
+  const extra = Object.keys(dp).filter(k => !(k in DP_META));
+  return metaKeys.concat(extra).sort((a,b)=> grpOf(a)-grpOf(b) || a.localeCompare(b));
+}
+const inStatusView = k =>
+  k === "Fon_Current_Pressure" || k === "System_Temperature"
+  || k.startsWith("Ambient_") || k.startsWith("Device_");
+let dpMode = "status";
+function renderDpTable(){
+  const d = dev(); const el = document.getElementById("dpview");
+  document.getElementById("segstatus").classList.toggle("active", dpMode==="status");
+  document.getElementById("segall").classList.toggle("active", dpMode!=="status");
+  if (!d){ el.innerHTML = "<div class='meta'>— no device —</div>"; return; }
+  const dp = d.dp || {}, ages = d.dp_ages || {};
+  let keys = dpKeysStable(dp);
+  if (dpMode==="status") keys = keys.filter(inStatusView);
+  let rows = "", lastGrp = -1;
+  for (const k of keys){
+    const g = grpOf(k);
+    if (g !== lastGrp && g < DP_GROUPS.length){
+      rows += `<tr class="grp"><td colspan="3">${DP_GROUPS[g].replace("_","")}</td></tr>`;
+      lastGrp = g;
+    }
+    const has = k in dp;
+    const val = (d.online && has) ? `<td class="val">${fmtVal(k, dp[k])}</td>`
+                                  : `<td class="val na">n.a.</td>`;
+    rows += `<tr><td class="name">${k}</td>${val}<td class="age">${(d.online&&has)?fmtAge(ages[k]):"—"}</td></tr>`;
+  }
+  el.innerHTML = `<table><thead><tr><th>Datapoint</th><th>Value</th><th>Updated</th></tr></thead>
+    <tbody>${rows}</tbody></table>`;
+}
+document.getElementById("segstatus").onclick = ()=>{ dpMode="status"; renderDpTable(); };
+document.getElementById("segall").onclick    = ()=>{ dpMode="all"; renderDpTable(); };
+
+/* ================= control wiring ================= */
+const CMD = [
+  { cmd:"set_state", target:"On",     label:"Turn on", cls:"pri" },
+  { cmd:"set_state", target:"Off",    label:"Turn off", cls:"" },
+  { cmd:"set_state", target:"Auto",   label:"Automatic", cls:"" },
+  { cmd:"set_state", target:"Manual", label:"Manual", cls:"" },
+  { cmd:"restart",                    label:"Restart pump cycle", cls:"" },
+  { cmd:"reboot",                     label:"Reboot device", cls:"danger" },
+];
+/* Button interaction feedback: disabled while the request runs (+ "…"),
+ * afterwards success (green) or error (red) flashes right on the button.
+ * The result field (showRes) is kept in addition. */
+async function pressBtn(b, run){
+  if (b.disabled) return null;
+  const old = b.textContent;
+  b.disabled = true; b.classList.add("busy"); b.textContent = old + " …";
+  let r = null;
+  try { r = await run(); }
+  finally { b.disabled = false; b.classList.remove("busy"); b.textContent = old; }
+  const ok = r && r.status===200 && !(r.data && r.data.error);
+  b.classList.add(ok ? "flash-ok" : "flash-bad");
+  setTimeout(()=>b.classList.remove("flash-ok","flash-bad"), 1200);
+  return r;
+}
+/* Trigger turn_on_duration with N steps (30 s per step) from button b. */
+function sendDuration(b, res, steps){
+  if (!Number.isFinite(steps) || steps < 1) {
+    showRes(res, {status:400, data:{error:"duration must be >= 0.5 min"}});
+    b.classList.add("flash-bad");
+    setTimeout(()=>b.classList.remove("flash-bad"), 1200);
+    return;
+  }
+  pressBtn(b, ()=>api("/api/command",
+    {device_id:CUR, command:"turn_on_duration", duration_steps:steps}))
+    .then(r=>r&&showRes(res,r));
+}
+function buildControls(){
+  const row = document.getElementById("cmdrow"); row.innerHTML = "";
+  const res = document.getElementById("ctrlres");
+  CMD.forEach(c=>{ const b=document.createElement("button");
+    b.textContent=c.label; b.className=c.cls;
+    b.onclick=()=>pressBtn(b, ()=>api("/api/command",
+      {device_id:CUR, command:c.cmd, ...(c.target?{target_state:c.target}:{})}))
+      .then(r=>r&&showRes(res,r));
+    row.appendChild(b); });
+  /* Presets 2/5/10 min (duration_steps = minutes x 2). */
+  document.querySelectorAll("button.dpre").forEach(b=>
+    b.onclick = ()=>sendDuration(b, res, Number(b.dataset.steps)));
+  /* Free input in MINUTES (half minutes allowed -> x2 = 30 s steps). */
+  const durbtn = document.getElementById("durbtn");
+  durbtn.onclick = ()=>sendDuration(durbtn, res,
+    Math.round(Number(document.getElementById("dur").value) * 2));
+  const wbtn = document.getElementById("wbtn");
+  wbtn.onclick = ()=>{
+    const name = document.getElementById("wsel").value;
+    const raw = document.getElementById("wval").value;
+    let v; if (raw==="true"||raw==="false") v = raw==="true";
+    else { const n=Number(raw); v = Number.isFinite(n)&&raw!==""?n:raw; }
+    pressBtn(wbtn, ()=>api("/api/dp_write",{device_id:CUR,dp:{[name]:v}}))
+      .then(r=>r&&showRes(res,r)); };
+  const readbtn = document.getElementById("readbtn");
+  readbtn.onclick = ()=>pressBtn(readbtn, ()=>api("/api/dp_read",
+    {device_id:CUR,names:[]})).then(r=>r&&showRes(res,r));
+  const otabtn = document.getElementById("otabtn");
+  otabtn.onclick = ()=>pressBtn(otabtn, ()=>api("/api/ota_cancel",
+    {device_id:CUR})).then(r=>r&&showRes(document.getElementById("fwres"),r));
+  const rebootbtn = document.getElementById("rebootbtn");
+  rebootbtn.onclick = ()=>pressBtn(rebootbtn, ()=>api("/api/command",
+    {device_id:CUR,command:"reboot"}))
+    .then(r=>r&&showRes(document.getElementById("fwres"),r));
+}
+/* Running timed-on status below the duration buttons (from the 3 s poll). */
+function updateDurState(){
+  const el = document.getElementById("durstate"); if (!el) return;
+  const d = dev(); const dp = d?.dp || {};
+  const on = dp.Fon_Relay_Output;
+  const rem = dp.Fon_Remaining_Time;
+  if (on && Number.isFinite(rem) && rem > 0) {
+    const mm = Math.floor(rem/60), ss = String(rem%60).padStart(2,"0");
+    el.textContent = `Pump ON — remaining ${mm}:${ss}`;
+  } else if (on) {
+    el.textContent = "Pump ON (no time limit)";
+  } else {
+    el.textContent = "";
+  }
+}
+function setControlsEnabled(on){
+  document.querySelectorAll("#page-control button, #page-firmware button")
+    .forEach(b=>b.disabled=!on);
+}
+
+/* ================= device selection + refresh loop ================= */
+function pickDevice(id){
+  if (CUR===id) return;
+  CUR = id;
+  localStorage.setItem("fountain.cur", id);   // selection survives reload
+  HIST.length = 0; histLastI = 0; HIST_SEQS.clear();  // chart restarts per device
+  renderAll(); pollHistory();
+}
+document.getElementById("devpick").onchange = e => pickDevice(e.target.value);
+
+/* Device card strip: all Fountainers with status, click = select. */
+function renderDevCards(){
+  const box = document.getElementById("devcards");
+  box.innerHTML = DEVICES.map(d => `
+    <div class="devcard${d.device_id===CUR?" sel":""}" data-id="${d.device_id}">
+      <div class="dl"><span class="dot ${d.online?"on":"off"}"></span>${devLabel(d)}</div>
+      <div class="did">${d.device_id}</div>
+      <div class="dmeta">${d.online?"online":"offline"} · fw ${d.fw_version||"–"}${
+        (d.dp && typeof d.dp.Fon_Current_Pressure==="number")
+          ? " · "+d.dp.Fon_Current_Pressure.toFixed(2)+" bar" : ""}</div>
+    </div>`).join("");
+  box.querySelectorAll(".devcard").forEach(c => c.onclick = () => pickDevice(c.dataset.id));
+}
+
+function renderAll(){
+  const d = dev();
+  renderDevCards();
+  renderTiles(); renderDpTable(); updateDurState();
+  document.getElementById("dashevents").innerHTML = feed((d?.events||[]).slice(-8), evFmt);
+  document.getElementById("srvevents").innerHTML = feed(d?.events, evFmt);
+  document.getElementById("devlog").innerHTML = feed(d?.logs, logFmt);
+  document.getElementById("fwbox").innerHTML = FIRMWARE.length
+    ? `<table><thead><tr><th>File</th><th>Version</th><th>Size</th><th>SHA-256</th></tr></thead><tbody>`
+      + FIRMWARE.map(f=>`<tr><td class="name">${f.filename}</td><td class="val">${f.version}</td>`
+        + `<td>${f.size.toLocaleString()} B</td><td class="meta">${f.sha256.slice(0,20)}…</td></tr>`).join("")
+      + "</tbody></table>"
+    : "<div class='meta'>— no firmware images —</div>";
+  setControlsEnabled(!!(d && d.online));
+}
+
+let busy=false;
+async function refresh(){
+  if (busy) return; busy=true;
+  try{
+    const r = await fetch("/api/devices");
+    if (r.status===401){ location.href="/login"; return; }
+    const j = await r.json();
+    DEVICES = j.devices; FIRMWARE = j.firmware;
+    const pick = document.getElementById("devpick");
+    const opts = DEVICES.map(d=>`<option value="${d.device_id}">`
+      + `${d.online?"●":"○"} ${devLabel(d)}</option>`).join("");
+    if (pick.innerHTML !== opts){ pick.innerHTML = opts; }
+    if (CUR && !DEVICES.some(d=>d.device_id===CUR)) CUR = null;  // device gone -> pick anew
+    if (!CUR && DEVICES.length){
+      const saved = localStorage.getItem("fountain.cur");
+      CUR = DEVICES.some(d=>d.device_id===saved) ? saved : DEVICES[0].device_id;
+    }
+    pick.value = CUR;
+    const online = DEVICES.filter(d=>d.online).length;
+    document.getElementById("summary").textContent =
+      `${online}/${DEVICES.length} device${DEVICES.length===1?"":"s"} online`;
+    renderAll();
+  } finally { busy=false; }
+}
+
+loadMeta().then(()=>{ buildControls(); refresh().then(pollHistory); });
+setInterval(refresh, 3000);
+setInterval(pollHistory, 3000);
+showPage(location.hash.replace("#","") || "dashboard");
+</script>
+</body>
+</html>

@@ -1,0 +1,21 @@
+__pycache__/
+*.pyc
+.git/
+.venv/
+venv/
+data/
+*.db
+.env
+.pytest_cache/
+
+# Runtime data — does not belong in the image (sessions contain tokens;
+# devices.json and FIRMWARE_UPDATES are mounted via volumes).
+.admin_sessions.json
+DEVICE_LOGS/
+FIRMWARE_UPDATES/*.bin
+
+# Host scripts / tests — not needed in the container.
+start.sh
+stop.sh
+tests/
+esp_client_simulator.py

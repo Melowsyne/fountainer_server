@@ -1,0 +1,609 @@
+{
+ "Device_Serial_Number": {
+  "type": "U64",
+  "access": "RO",
+  "persist": "STATIC"
+ },
+ "Device_HW_Version": {
+  "type": "STR",
+  "access": "RO",
+  "persist": "STATIC"
+ },
+ "Device_SW_Version": {
+  "type": "STR",
+  "access": "RO",
+  "persist": "STATIC"
+ },
+ "Device_Build_Version": {
+  "type": "U64",
+  "access": "RO",
+  "persist": "STATIC",
+  "fmt": "datetime"
+ },
+ "System_Temperature": {
+  "type": "F32",
+  "access": "RO",
+  "persist": "VOLATILE",
+  "unit": "\u00b0C",
+  "dec": 1
+ },
+ "System_Utilization": {
+  "type": "U8",
+  "access": "RO",
+  "persist": "VOLATILE",
+  "unit": "%"
+ },
+ "System_Memory_Free": {
+  "type": "U32",
+  "access": "RO",
+  "persist": "VOLATILE",
+  "unit": "B"
+ },
+ "System_Min_Memory_Free": {
+  "type": "U32",
+  "access": "RO",
+  "persist": "VOLATILE",
+  "unit": "B"
+ },
+ "System_Largest_Free_Block": {
+  "type": "U32",
+  "access": "RO",
+  "persist": "VOLATILE",
+  "unit": "B"
+ },
+ "System_Flash_Free": {
+  "type": "U32",
+  "access": "RO",
+  "persist": "VOLATILE",
+  "unit": "B"
+ },
+ "System_RSSI": {
+  "type": "I8",
+  "access": "RO",
+  "persist": "VOLATILE",
+  "unit": "dBm"
+ },
+ "System_Uptime": {
+  "type": "U32",
+  "access": "RO",
+  "persist": "VOLATILE",
+  "unit": "s"
+ },
+ "System_Min_Stack_Free": {
+  "type": "U32",
+  "access": "RO",
+  "persist": "VOLATILE",
+  "unit": "B"
+ },
+ "System_Reconnect_Count": {
+  "type": "U32",
+  "access": "RO",
+  "persist": "VOLATILE"
+ },
+ "System_Reset_Reason": {
+  "type": "ENUM",
+  "access": "RO",
+  "persist": "VOLATILE",
+  "map": "reset"
+ },
+ "System_Power_Mode": {
+  "type": "U8",
+  "access": "RO",
+  "persist": "VOLATILE",
+  "map": "power"
+ },
+ "System_Event_Drops": {
+  "type": "U32",
+  "access": "RO",
+  "persist": "VOLATILE"
+ },
+ "Net_Link_Score": {
+  "type": "U8",
+  "access": "RO",
+  "persist": "VOLATILE"
+ },
+ "Net_Link_State": {
+  "type": "U8",
+  "access": "RO",
+  "persist": "VOLATILE",
+  "map": "linkstate"
+ },
+ "Net_Session_Drops": {
+  "type": "U32",
+  "access": "RO",
+  "persist": "VOLATILE"
+ },
+ "Net_Send_Fail_Count": {
+  "type": "U32",
+  "access": "RO",
+  "persist": "VOLATILE"
+ },
+ "Net_Offline_Seconds": {
+  "type": "U32",
+  "access": "RO",
+  "persist": "VOLATILE",
+  "unit": "s"
+ },
+ "Net_Last_Offline_S": {
+  "type": "U32",
+  "access": "RO",
+  "persist": "VOLATILE",
+  "unit": "s"
+ },
+ "Ambient_Temperature": {
+  "type": "F32",
+  "access": "RO",
+  "persist": "VOLATILE",
+  "unit": "\u00b0C",
+  "dec": 1
+ },
+ "Ambient_Humidity": {
+  "type": "F32",
+  "access": "RO",
+  "persist": "VOLATILE",
+  "unit": "%rH",
+  "dec": 1
+ },
+ "Fon_Current_Pressure": {
+  "type": "F32",
+  "access": "RO",
+  "persist": "VOLATILE",
+  "unit": "bar",
+  "dec": 2
+ },
+ "Fon_Sensor_Voltage_mV": {
+  "type": "U32",
+  "access": "RO",
+  "persist": "VOLATILE",
+  "unit": "mV"
+ },
+ "Fon_Current_State": {
+  "type": "ENUM",
+  "access": "RO",
+  "persist": "VOLATILE",
+  "map": "state"
+ },
+ "Fon_Relay_Output": {
+  "type": "BOOL",
+  "access": "RO",
+  "persist": "VOLATILE",
+  "map": "onoff"
+ },
+ "Fon_Run_Time": {
+  "type": "U32",
+  "access": "RO",
+  "persist": "VOLATILE",
+  "unit": "s"
+ },
+ "Fon_Cycles_Total": {
+  "type": "U32",
+  "access": "RO",
+  "persist": "VOLATILE"
+ },
+ "Fon_Remaining_Time": {
+  "type": "U32",
+  "access": "RO",
+  "persist": "VOLATILE",
+  "unit": "s"
+ },
+ "Fon_Pressure_Filtered": {
+  "type": "F32",
+  "access": "RO",
+  "persist": "VOLATILE",
+  "unit": "bar",
+  "dec": 2
+ },
+ "Fon_Pressure_Slope": {
+  "type": "F32",
+  "access": "RO",
+  "persist": "VOLATILE",
+  "unit": "bar/s",
+  "dec": 3
+ },
+ "Fon_Demand_State": {
+  "type": "ENUM",
+  "access": "RO",
+  "persist": "VOLATILE",
+  "map": "demand"
+ },
+ "Fon_Anomaly_Score": {
+  "type": "U16",
+  "access": "RO",
+  "persist": "VOLATILE"
+ },
+ "Fon_Event_Duration": {
+  "type": "U32",
+  "access": "RO",
+  "persist": "VOLATILE",
+  "unit": "s"
+ },
+ "Fon_Est_Flow_L_Min": {
+  "type": "F32",
+  "access": "RO",
+  "persist": "VOLATILE",
+  "unit": "l/min",
+  "dec": 1
+ },
+ "Fon_Est_Volume_Total": {
+  "type": "F32",
+  "access": "RO",
+  "persist": "VOLATILE",
+  "unit": "l",
+  "dec": 1
+ },
+ "Fon_Fault_Code": {
+  "type": "U8",
+  "access": "RO",
+  "persist": "VOLATILE",
+  "map": "fault"
+ },
+ "Fon_Starts_Per_Hour": {
+  "type": "U8",
+  "access": "RO",
+  "persist": "VOLATILE",
+  "unit": "/h"
+ },
+ "Fon_Sensor_Err_Count": {
+  "type": "U32",
+  "access": "RO",
+  "persist": "VOLATILE"
+ },
+ "Fon_Sensor_Noise_mV": {
+  "type": "U16",
+  "access": "RO",
+  "persist": "VOLATILE",
+  "unit": "mV"
+ },
+ "Fon_Fault_Ack": {
+  "type": "U8",
+  "access": "RW",
+  "persist": "VOLATILE"
+ },
+ "Fon_Event_Label": {
+  "type": "U8",
+  "access": "RW",
+  "persist": "VOLATILE"
+ },
+ "Fon_Pressure_Manual": {
+  "type": "BOOL",
+  "access": "RW",
+  "persist": "VOLATILE",
+  "map": "onoff"
+ },
+ "Fon_Pressure_Value": {
+  "type": "F32",
+  "access": "RW",
+  "persist": "VOLATILE",
+  "unit": "bar",
+  "dec": 2
+ },
+ "Fon_Min_Pressure": {
+  "type": "F32",
+  "access": "RW",
+  "persist": "NVS",
+  "unit": "bar",
+  "dec": 2
+ },
+ "Fon_Max_Pressure": {
+  "type": "F32",
+  "access": "RW",
+  "persist": "NVS",
+  "unit": "bar",
+  "dec": 2
+ },
+ "Fon_Alert_High_Pressure": {
+  "type": "F32",
+  "access": "RW",
+  "persist": "NVS",
+  "unit": "bar",
+  "dec": 2
+ },
+ "Fon_Alert_Low_Pressure": {
+  "type": "F32",
+  "access": "RW",
+  "persist": "NVS",
+  "unit": "bar",
+  "dec": 2
+ },
+ "Fon_Min_On_Time": {
+  "type": "U16",
+  "access": "RW",
+  "persist": "NVS",
+  "unit": "s"
+ },
+ "Fon_Max_On_Time": {
+  "type": "U16",
+  "access": "RW",
+  "persist": "NVS",
+  "unit": "s"
+ },
+ "Fon_Dry_Run_Detect_Time": {
+  "type": "U16",
+  "access": "RW",
+  "persist": "NVS",
+  "unit": "s"
+ },
+ "Fon_Dry_Run_Min_Rise": {
+  "type": "U16",
+  "access": "RW",
+  "persist": "NVS"
+ },
+ "Fon_Check_Valve_Timeout": {
+  "type": "U16",
+  "access": "RW",
+  "persist": "NVS",
+  "unit": "s"
+ },
+ "Fon_Pressure_Drop_Rate": {
+  "type": "U16",
+  "access": "RW",
+  "persist": "NVS"
+ },
+ "Fon_Report_Interval": {
+  "type": "U16",
+  "access": "RW",
+  "persist": "NVS"
+ },
+ "Fon_Sensor_Offset": {
+  "type": "I16",
+  "access": "RW",
+  "persist": "NVS"
+ },
+ "Fon_Sensor_Scale": {
+  "type": "F32",
+  "access": "RW",
+  "persist": "NVS"
+ },
+ "Fon_Sensor_Range_Bar": {
+  "type": "F32",
+  "access": "RW",
+  "persist": "NVS",
+  "unit": "bar",
+  "dec": 2
+ },
+ "Fon_Min_Off_Time": {
+  "type": "U16",
+  "access": "RW",
+  "persist": "NVS",
+  "unit": "s"
+ },
+ "Fon_Filter_Alpha": {
+  "type": "F32",
+  "access": "RW",
+  "persist": "NVS"
+ },
+ "Fon_Stable_Slope": {
+  "type": "F32",
+  "access": "RW",
+  "persist": "NVS"
+ },
+ "Fon_Max_Starts_Per_Hour": {
+  "type": "U8",
+  "access": "RW",
+  "persist": "NVS"
+ },
+ "Fon_Hand_Min_Pressure": {
+  "type": "F32",
+  "access": "RW",
+  "persist": "NVS",
+  "unit": "bar",
+  "dec": 2
+ },
+ "Fon_Hand_Max_Pressure": {
+  "type": "F32",
+  "access": "RW",
+  "persist": "NVS",
+  "unit": "bar",
+  "dec": 2
+ },
+ "Fon_Tank_Min_Pressure": {
+  "type": "F32",
+  "access": "RW",
+  "persist": "NVS",
+  "unit": "bar",
+  "dec": 2
+ },
+ "Fon_Tank_Max_Pressure": {
+  "type": "F32",
+  "access": "RW",
+  "persist": "NVS",
+  "unit": "bar",
+  "dec": 2
+ },
+ "Fon_Hand_Max_Duration": {
+  "type": "U16",
+  "access": "RW",
+  "persist": "NVS",
+  "unit": "min"
+ },
+ "Fon_Tank_Max_Duration": {
+  "type": "U16",
+  "access": "RW",
+  "persist": "NVS",
+  "unit": "min"
+ },
+ "Fon_Unknown_Max_Duration": {
+  "type": "U16",
+  "access": "RW",
+  "persist": "NVS",
+  "unit": "min"
+ },
+ "Fon_Flow_K_Hand": {
+  "type": "F32",
+  "access": "RW",
+  "persist": "NVS"
+ },
+ "Fon_Flow_K_Tank": {
+  "type": "F32",
+  "access": "RW",
+  "persist": "NVS"
+ },
+ "Network_SSID": {
+  "type": "STR",
+  "access": "RW",
+  "persist": "NVS"
+ },
+ "Network_Password": {
+  "type": "STR",
+  "access": "RW",
+  "persist": "NVS"
+ },
+ "Network_Server": {
+  "type": "STR",
+  "access": "RW",
+  "persist": "NVS"
+ },
+ "Network_Server_Port": {
+  "type": "U16",
+  "access": "RW",
+  "persist": "NVS"
+ },
+ "Network_DHCP": {
+  "type": "BOOL",
+  "access": "RW",
+  "persist": "NVS",
+  "map": "dhcp"
+ },
+ "Network_IP_Address": {
+  "type": "STR",
+  "access": "RW",
+  "persist": "NVS"
+ },
+ "Network_Subnetmask": {
+  "type": "STR",
+  "access": "RW",
+  "persist": "NVS"
+ },
+ "Network_Gateway": {
+  "type": "STR",
+  "access": "RW",
+  "persist": "NVS"
+ },
+ "Net_PS_Override": {
+  "type": "U8",
+  "access": "RW",
+  "persist": "NVS"
+ },
+ "Backup_DHCP": {
+  "type": "BOOL",
+  "access": "RO",
+  "persist": "NVS",
+  "map": "dhcp"
+ },
+ "Backup_IP_Address": {
+  "type": "STR",
+  "access": "RO",
+  "persist": "NVS"
+ },
+ "Backup_Subnetmask": {
+  "type": "STR",
+  "access": "RO",
+  "persist": "NVS"
+ },
+ "Backup_Gateway": {
+  "type": "STR",
+  "access": "RO",
+  "persist": "NVS"
+ },
+ "Backup_Server": {
+  "type": "STR",
+  "access": "RO",
+  "persist": "NVS"
+ },
+ "Backup_Server_Port": {
+  "type": "U16",
+  "access": "RO",
+  "persist": "NVS"
+ },
+ "Backup_SSID": {
+  "type": "STR",
+  "access": "RO",
+  "persist": "NVS"
+ },
+ "Backup_Password": {
+  "type": "STR",
+  "access": "RO",
+  "persist": "NVS"
+ },
+ "Log_Enabled": {
+  "type": "BOOL",
+  "access": "RW",
+  "persist": "NVS"
+ },
+ "Log_Runtime_Level": {
+  "type": "U8",
+  "access": "RW",
+  "persist": "NVS"
+ },
+ "Log_Flash_Level": {
+  "type": "U8",
+  "access": "RW",
+  "persist": "NVS"
+ },
+ "Network_Save": {
+  "type": "U8",
+  "access": "RW",
+  "persist": "VOLATILE"
+ },
+ "Network_Trial_State": {
+  "type": "U8",
+  "access": "RO",
+  "persist": "VOLATILE",
+  "map": "trial"
+ },
+ "Log_Next_Seq": {
+  "type": "U32",
+  "access": "RO",
+  "persist": "VOLATILE"
+ },
+ "Log_Dropped": {
+  "type": "U32",
+  "access": "RO",
+  "persist": "VOLATILE"
+ },
+ "Log_Dropped_Flash": {
+  "type": "U32",
+  "access": "RO",
+  "persist": "VOLATILE"
+ },
+ "Log_Prev_Boot_Available": {
+  "type": "BOOL",
+  "access": "RO",
+  "persist": "VOLATILE"
+ },
+ "Log_Command": {
+  "type": "U8",
+  "access": "RW",
+  "persist": "VOLATILE"
+ },
+ "Pressure_Hist_Next_Seq": {
+  "type": "U32",
+  "access": "RO",
+  "persist": "VOLATILE"
+ },
+ "Pressure_Hist_Overwritten": {
+  "type": "U32",
+  "access": "RO",
+  "persist": "VOLATILE"
+ },
+ "Pressure_Hist_Highwater": {
+  "type": "U32",
+  "access": "RO",
+  "persist": "VOLATILE"
+ },
+ "System_WD_Last_Channel": {
+  "type": "U8",
+  "access": "RO",
+  "persist": "VOLATILE"
+ },
+ "System_WD_Last_Checkpoint": {
+  "type": "U16",
+  "access": "RO",
+  "persist": "VOLATILE"
+ },
+ "System_WD_Reboot_Count": {
+  "type": "U8",
+  "access": "RO",
+  "persist": "VOLATILE"
+ }
+}

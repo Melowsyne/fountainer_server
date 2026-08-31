@@ -1,0 +1,11 @@
+# Fountain v2.2 Server (server/ + fountain_proto/ + run_server.py)
+# The HMAC authentication uses only the standard library (hmac/hashlib);
+# so does the firmware HTTP server (http.server). The only runtime dependency
+# is the WebSocket library.
+websockets==12.0
+
+# Admin web interface (login + RPC buttons), asyncio-native in the same loop.
+aiohttp>=3.9
+
+# Tests only:
+pytest>=8.0
