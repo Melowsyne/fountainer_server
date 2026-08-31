@@ -1,4 +1,4 @@
-# Fountain v2.2 — Linux server
+# fountainer_server — Fountain v2.2 Linux server
 
 Server-side implementation of the **WebSocket protocol v2.2** (Fountain) built on
 the `serverside_protocol` framework (included here as the package
@@ -62,7 +62,7 @@ session proof (`ota_check`) with `ota_available` **or** `ota_none`.
 Authentication follows the internal `AUTH-CONTRACT.md` spec byte for byte
 (not included in this repository); the **golden test
 vector** is reproduced in `tests/test_auth_golden.py` and guarantees
-interoperability with the ESP32 side (`esp_firmware`).
+interoperability with the ESP32 side (`fountainer_firmware`).
 
 ## Server pull: device log & pressure history
 
@@ -210,9 +210,9 @@ additional `kid`s.
 
 New series devices are registered by running
 `tools/register_server_devices.py --serial FNT-xxxxxx` in the firmware
-repository (`fountainer_firmware`) (strictly additive;
-`device_id` scheme **`esp32-<wifi-sta-mac>`**). The registry is read only at
-server start — afterwards run `bash start.sh`.
+repository (`fountainer_firmware`); registration is strictly additive, with
+the `device_id` scheme **`esp32-<wifi-sta-mac>`**. The registry is read only
+at server start — afterwards run `bash start.sh`.
 
 ## TLS / mTLS
 
@@ -239,8 +239,8 @@ Independently of that, the authenticity of the OTA metadata is secured by the
 
 ## Compatibility
 
-This repo now contains only the v2.2 server, which is compatible with the
-current ESP32 firmware. The expected device endpoint is
+This repository contains the v2.2 server, compatible with the current ESP32
+firmware. The expected device endpoint is
 `wss://192.168.1.12:8443/ws` (mTLS) with `hello`/`hello_ack`/`ota_check` and HMAC auth.
 The admin web UI runs separately on `http://<server>:8010/`.
 
