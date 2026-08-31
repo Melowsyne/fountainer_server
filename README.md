@@ -12,6 +12,57 @@ the RPCs described in the protocol as well as **OTA firmware updates**.
 
 ## Architecture
 
+One container, three ports: the device connects to the WebSocket endpoint
+(WSS + mTLS), pulls firmware images over HTTP, and the administrator uses
+the web UI. The protocol layer (`fountain_proto`) handles envelope, HMAC
+authentication and sessions; `FountainAppServer` on top keeps the device
+shadow, runs the log and history pollers and exposes the control API.
+
+```mermaid
+%%{init: {"flowchart": {"curve": "linear", "rankSpacing": 55, "nodeSpacing": 40}}}%%
+flowchart TB
+    DEV["Fountainer device<br/>(ESP32-S3, Fountain v2.2)"]
+    ADMIN["Administrator<br/>(browser)"]
+
+    subgraph SRV["fountain_server (Docker container)"]
+        direction TB
+        WS["WebSocket endpoint :8443<br/>(WSS + mTLS)"]
+        HTTPF["Firmware HTTP :8080<br/>(OTA image download,<br/>see Diagram 2)"]
+        WEB["Admin web UI :8010<br/>(login, RPC buttons,<br/>pressure chart)"]
+        PROTO["fountain_proto<br/>(envelope · HMAC auth ·<br/>anti-replay · DeviceSession)"]
+        APPC["FountainAppServer<br/>(device shadow · control API ·<br/>log + history pollers)"]
+        OTAS["FirmwareStore<br/>(newest version,<br/>size/crc32/sha256)"]
+        WS --> PROTO
+        PROTO --> APPC
+        WEB --> APPC
+        APPC --> OTAS
+    end
+
+    REG[("devices.json<br/>(registry)")]
+    LOGS[("DEVICE_LOGS/<br/>(JSONL per boot)")]
+    FWDIR[("FIRMWARE_UPDATES/<br/>(*.bin)")]
+
+    DEV <==>|"wss:// (protocol)"| WS
+    ADMIN ==> WEB
+    PROTO -.-> REG
+    APPC -.-> LOGS
+    OTAS -.-> FWDIR
+    HTTPF -.-> FWDIR
+
+    classDef blackbox stroke:#000,color:#000
+    class DEV,ADMIN,WS,HTTPF,WEB,PROTO,APPC,OTAS,REG,LOGS,FWDIR blackbox
+    style SRV fill:#e8f4fd,stroke:#000,color:#000
+    style DEV fill:#fde8e8,stroke:#000,color:#000
+    style ADMIN fill:#fdebd0,stroke:#000,color:#000
+```
+
+*Diagram 1: Server structure — three ports into one container; the protocol
+framework authenticates and correlates, the application layer keeps state
+and pulls logs/history, and the firmware store feeds both the signed OTA
+offers and the HTTP download endpoint.*
+
+Repository map:
+
 ```
 start.sh / stop.sh          start/restart the stack via Docker, or shut it down cleanly
 run_server.py                entry point (reads ENV, starts everything)
@@ -63,6 +114,37 @@ Authentication follows the internal `AUTH-CONTRACT.md` spec byte for byte
 (not included in this repository); the **golden test
 vector** is reproduced in `tests/test_auth_golden.py` and guarantees
 interoperability with the ESP32 side (`fountainer_firmware`).
+
+### OTA update flow
+
+The update path is server-attested end to end: the metadata travels signed
+over the protocol, the image itself over plain HTTP — the device verifies
+size, SHA-256 and the RSA-3072 image signature before switching boot slots.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant D as Device (ESP32-S3)
+    participant S as Server (WSS :8443)
+    participant H as Firmware HTTP (:8080)
+
+    D->>S: hello (device id, fw 4.36.0, nonce)
+    S->>D: hello_ack (nonce, HMAC kid)
+    D->>S: ota_check — signed session proof
+    Note over S: FirmwareStore: newest image 4.37.0 > 4.36.0
+    S->>D: ota_available (signed: version, url, size, crc32, sha256)
+    D->>H: GET /fountain-4.37.0.bin (streaming)
+    H-->>D: firmware image
+    D->>S: ota_status: downloading (progress)
+    Note over D: verify SHA-256 + RSA image signature,<br/>only then switch the boot slot
+    D->>S: ota_status: applied — reboot
+    D->>S: hello (fw 4.37.0) after reboot
+    S->>D: ota_none — session RUNNING
+```
+
+*Diagram 2: OTA end to end — the signed `ota_available` manifest makes the
+verification data server-attested; a failed check leaves the old boot slot
+active (fail-safe, see the firmware repository for the device side).*
 
 ## Server pull: device log & pressure history
 
