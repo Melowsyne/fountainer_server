@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fountainer Admin — Login</title>
+<style>
+  body { font-family:system-ui,-apple-system,"Segoe UI",sans-serif; background:#f7f7f5;
+         color:#111; display:flex; min-height:100vh; align-items:center;
+         justify-content:center; margin:0; }
+  form { background:#fff; border:1px solid #cfcfcd; padding:2rem 2.2rem;
+         border-radius:10px; width:320px; }
+  h1 { font-size:1rem; margin:0 0 1.4rem; font-weight:700; letter-spacing:.14em; }
+  h1 small { font-weight:400; color:#767676; letter-spacing:.05em; margin-left:.5rem; }
+  label { display:block; font-size:.7rem; margin:.8rem 0 .25rem; color:#767676;
+          text-transform:uppercase; letter-spacing:.07em; }
+  input { width:100%; padding:.55rem .6rem; border-radius:7px; border:1px solid #cfcfcd;
+          background:#fff; color:#111; box-sizing:border-box; font-size:.9rem; }
+  input:focus { outline:none; border-color:#111; }
+  button { width:100%; margin-top:1.4rem; padding:.65rem; border:1px solid #111;
+           border-radius:8px; background:#111; color:#fff; font-weight:600;
+           cursor:pointer; font-size:.9rem; }
+  button:hover { background:#000; }
+  .err { font-size:.8rem; margin-top:.9rem; min-height:1em; font-weight:600; }
+  .err:not(:empty)::before { content:"✕ "; }
+</style>
+</head>
+<body>
+<form method="post" action="/login">
+  <h1>FOUNTAINER<small>admin</small></h1>
+  <label for="u">Username</label>
+  <input id="u" name="username" autocomplete="username" autofocus>
+  <label for="p">Password</label>
+  <input id="p" name="password" type="password" autocomplete="current-password">
+  <button type="submit">Log in</button>
+  <div class="err" id="err"></div>
+</form>
+<script>
+  if (new URLSearchParams(location.search).has("error"))
+    document.getElementById("err").textContent = "Login failed.";
+</script>
+</body>
+</html>
